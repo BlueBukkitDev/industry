@@ -1,20 +1,25 @@
 mod textures;
 mod world;
 
+use geometry_2d::geometry::Position;
 use ggez::{GameResult, event, conf, Context};
-use ggez::graphics::{Color, Canvas, DrawParam};
+use ggez::graphics::{Color, Canvas};
+use world::{World, TerrainType};
 use std::{path, env};
-use textures::TerrainTex;
 
 pub struct MainState {
-    textures:TerrainTex
+    world:World
 }
 
 impl MainState {
     pub fn new(ctx: &mut Context) -> GameResult<MainState> {
         Ok(MainState{
-            textures: TerrainTex::init(ctx)
+            world: World::new(2, ctx)
         })
+    }
+
+    pub fn get_world(&mut self) -> &mut World {
+        &mut self.world
     }
 }
 
@@ -29,10 +34,7 @@ impl event::EventHandler for MainState {
             Color::from_rgb(0, 0, 0)
         );
 
-        canvas.draw(self.textures.terrain_grass(), DrawParam::new());
-
-        //let my_dest = glam::vec2(13.0, 37.0);
-        //canvas.draw(&image, DrawParam::default().dest(my_dest));
+        self.get_world().render(&mut canvas, Position::new(0.0, 0.0));
 
         canvas.finish(_ctx)?;
         Ok(())
@@ -51,7 +53,8 @@ pub fn main() -> GameResult {
 
     let cb:ggez::ContextBuilder = ggez::ContextBuilder::new("Industry", "Blue Dev").window_mode(mode).add_resource_path(resource_dir);
     let (mut ctx, event_loop) = cb.build()?;
-    let state:MainState = MainState::new(&mut ctx)?;
+    let mut state:MainState = MainState::new(&mut ctx)?;
+    state.get_world().set_terrain(Position::new(0.0, 0.0), TerrainType::Grass);
 
     event::run(ctx, event_loop, state)
 }
