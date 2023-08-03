@@ -55,7 +55,7 @@ impl event::EventHandler for MainState {
 }
 
 pub fn main() -> GameResult {
-    let mode = conf::WindowMode::default();
+    let mode = conf::WindowMode::default().fullscreen_type(conf::FullscreenType::Desktop);
     let resource_dir = if let Ok(manifest_dir) = env::var("CARGO_MANIFEST_DIR") {
         let mut path = path::PathBuf::from(manifest_dir);
         path.push("res");

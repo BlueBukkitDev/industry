@@ -1132,6 +1132,7 @@ version = "0.1.0"
 dependencies = [
  "geometry_2d",
  "ggez",
+ "glam",
  "rand 0.7.3",
 ]
 
