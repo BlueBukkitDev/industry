@@ -1,108 +1,85 @@
 #![allow(unused)]
 
-use geometry_2d::geometry::Position;
+use geometry_2d::geometry::Position_i32;
 use ggez::{graphics::{Canvas, DrawParam, Image}, Context};
 
-use crate::textures::{TerrainTex, ImprovementTex, StructureTex};
+use crate::{textures::{TerrainTex, ImprovementTex, StructureTex}, client::Viewport};
 
 pub struct World {
-    ter_tex:TerrainTex,
-    imp_tex:ImprovementTex,
-    str_tex:StructureTex,
-    terrain_tiles:Vec<Tile>,
-    improvement_tiles:Vec<Tile>,
-    structure_tiles:Vec<Tile>
+    tiles:Vec<Vec<Tile>>,
+    view:Viewport,
+    size:i8
 }
 
 impl World {
-    pub fn new(width:usize, ctx:&mut Context) -> World {
-        World {
-            ter_tex:TerrainTex::init(ctx),
-            imp_tex:ImprovementTex::init(ctx),
-            str_tex:StructureTex::init(ctx),
-            terrain_tiles:Vec::with_capacity(width*width),
-            improvement_tiles:Vec::with_capacity(width*width),
-            structure_tiles:Vec::with_capacity(width*width)
-        }
+    pub fn new(width:usize, ctx:&mut Context, size:i8) -> World {
+        let mut world = World {
+            tiles:Vec::with_capacity(width*width),
+            view:Viewport::new(Position_i32::new(0, 0), Vec::new(), ctx),
+            size:size
+        };
+        world.populate();
+        world.view.populate();
+        world.view.update(&world.tiles);
+        world
     }
 
-    fn set_tile(&mut self, x:f32, y:f32) {
-        self.terrain_tiles[x as usize] = Tile::new(TerrainType::Grass, ImprovementType::None, StructureType::None, Position::new(x, y));
+    fn set_tile(&mut self, x:usize, y:usize, terrain:TerrainType) {
+        self.tiles[x][y] = Tile::new(terrain, ImprovementType::None, StructureType::None, Position_i32::new(x as i32, y as i32));
     }
     
     fn populate(&mut self) {
-        let mut x = 0.0;
-        let mut y = 0.0;
-        loop{
-            if x >= (self.terrain_tiles.len() as f32).sqrt() {//end of line
-                x = 0.0;
-                y += 1.0;
-                break;
+        let max = self.size as usize;
+        println!("World width: {} (fn populate)", max);
+        for y in 0..max {
+            self.tiles.push(Vec::new());
+        }
+        for y in 0..max {
+            for x in 0..max {
+                self.tiles[y].push(Tile::new(TerrainType::Grass, ImprovementType::None, StructureType::None, Position_i32::new(x as i32, y as i32)));
             }
-            self.set_tile(x, y);
-            x += 1.0;
         }
     }
 
-    pub fn render(&self, canvas: &mut Canvas, pos: Position) {
-        canvas.draw(self.ter_tex.terrain_grass(), DrawParam::new());
+    pub fn render(&self, canvas: &mut Canvas, pos: Position_i32) {
+        self.view.render(canvas);
     }
 
-    pub fn get_terrain(&self) -> &Vec<Tile> {
-        &self.terrain_tiles
+    pub fn get_tiles(&self) -> &Vec<Vec<Tile>> {
+        &self.tiles
     }
 
-    pub fn get_improvements(&self) -> &Vec<Tile> {
-        &self.improvement_tiles
+    pub fn set_terrain(&mut self, pos:Position_i32, terrain:TerrainType) {
+        self.tiles[pos.x as usize][pos.y as usize].set_terrain(terrain);
     }
 
-    pub fn get_structures(&self) -> &Vec<Tile> {
-        &self.structure_tiles
+    pub fn set_improvement(&mut self, pos:Position_i32, improvement:ImprovementType) {
+        self.tiles[pos.x as usize][pos.y as usize].set_improvement(improvement);
     }
 
-    pub fn set_terrain(&mut self, pos:Position, terrain:TerrainType) {
-        let mut count = 0;
-        while count < self.terrain_tiles.len() {
-            if self.terrain_tiles[count].get_pos().x == pos.x && self.terrain_tiles[count].get_pos().y == pos.y {
-                self.terrain_tiles[count].set_terrain(terrain);
-                break;
-            }
-            count += 1;
-        }
+    pub fn set_structure(&mut self, pos:Position_i32, structure:StructureType) {
+        self.tiles[pos.x as usize][pos.y as usize].set_structure(structure);
     }
 
-    pub fn set_improvement(&mut self, pos:Position, improvement:ImprovementType) {
-        let mut count = 0;
-        while count < self.improvement_tiles.len() {
-            if self.improvement_tiles[count].get_pos().x == pos.x && self.improvement_tiles[count].get_pos().y == pos.y {
-                self.improvement_tiles[count].set_improvement(improvement);
-                break;
-            }
-            count += 1;
-        }
-    }
-
-    pub fn set_structure(&mut self, pos:Position, structure:StructureType) {
-        let mut count = 0;
-        while count < self.structure_tiles.len() {
-            if self.structure_tiles[count].get_pos().x == pos.x && self.structure_tiles[count].get_pos().y == pos.y {
-                self.structure_tiles[count].set_structure(structure);
-                break;
-            }
-            count += 1;
-        }
+    pub fn get_tile(&self, pos:Position_i32) -> Tile {
+        self.tiles[pos.x as usize][pos.y as usize]
     }
 }
 
+/**
+ A Tile is a struct to contain all information about a given cell in a world grid. It has a `Position_i32` which should never change, and data about what can be seen at that position such
+ as a `TerrainType`, an `ImprovementType`, and a `StructureType`. 
+ */
+#[derive(Copy, Clone)]
 pub struct Tile {
     terrain: TerrainType,
     improvement: ImprovementType,
     structure: StructureType,
-    pos:Position
+    pos:Position_i32
 }
 
 impl Tile {
-    pub fn new(terrain:TerrainType, improvement:ImprovementType, structure:StructureType, pos:Position) -> Tile {
+    pub fn new(terrain:TerrainType, improvement:ImprovementType, structure:StructureType, pos:Position_i32) -> Tile {
         Tile{
             terrain:terrain,
             improvement:improvement,
@@ -123,7 +100,7 @@ impl Tile {
         &self.structure
     }
 
-    pub fn get_pos(&self) -> Position {
+    pub fn get_pos(&self) -> Position_i32 {
         self.pos
     }
 
@@ -140,6 +117,7 @@ impl Tile {
     }
 }
 
+#[derive(Copy, Clone)]
 pub enum TerrainType {
     Grass,
     Sand,
@@ -147,6 +125,7 @@ pub enum TerrainType {
     Water
 }
 
+#[derive(Copy, Clone)]
 pub enum ImprovementType {
     None,
     Cleared,
@@ -162,6 +141,7 @@ pub enum ImprovementType {
     OilSlick
 }
 
+#[derive(Copy, Clone)]
 pub enum StructureType {
     None,
     CityHall,

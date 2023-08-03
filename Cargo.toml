@@ -9,4 +9,4 @@ authors = ["Blue Dev"]
 [dependencies]
 ggez = { git = "https://github.com/ggez/ggez/", branch = "devel"}
 rand = "0.7.3"
-geometry_2d = { git = "https://github.com/BlueBukkitDev/geometry_2d", branch = "master"}
+geometry_2d = { git = "https://github.com/BlueBukkitDev/geometry_2d"}

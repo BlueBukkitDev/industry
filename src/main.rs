@@ -1,7 +1,9 @@
 mod textures;
 mod world;
+mod client;
 
-use geometry_2d::geometry::Position;
+use geometry_2d::geometry::Position_i32;
+use ggez::input::keyboard::{KeyInput, self};
 use ggez::{GameResult, event, conf, Context};
 use ggez::graphics::{Color, Canvas};
 use world::{World, TerrainType};
@@ -14,7 +16,7 @@ pub struct MainState {
 impl MainState {
     pub fn new(ctx: &mut Context) -> GameResult<MainState> {
         Ok(MainState{
-            world: World::new(2, ctx)
+            world: World::new(2, ctx, 100)
         })
     }
 
@@ -34,9 +36,20 @@ impl event::EventHandler for MainState {
             Color::from_rgb(0, 0, 0)
         );
 
-        self.get_world().render(&mut canvas, Position::new(0.0, 0.0));
+        self.get_world().render(&mut canvas, Position_i32::new(0, 0));
+
+        _ctx.gfx.set_window_title(&format!(
+            "Industry Sim Game [FPS {}]", _ctx.time.fps()
+        ));
 
         canvas.finish(_ctx)?;
+        Ok(())
+    }
+
+    fn key_down_event(&mut self, _ctx: &mut Context, input: KeyInput, _repeat: bool) -> GameResult {
+        if input.keycode == Some(keyboard::KeyCode::Escape) {
+            _ctx.request_quit();
+        }
         Ok(())
     }
 }
@@ -54,7 +67,7 @@ pub fn main() -> GameResult {
     let cb:ggez::ContextBuilder = ggez::ContextBuilder::new("Industry", "Blue Dev").window_mode(mode).add_resource_path(resource_dir);
     let (mut ctx, event_loop) = cb.build()?;
     let mut state:MainState = MainState::new(&mut ctx)?;
-    state.get_world().set_terrain(Position::new(0.0, 0.0), TerrainType::Grass);
+    state.get_world().set_terrain(Position_i32::new(0, 0), TerrainType::Grass);
 
     event::run(ctx, event_loop, state)
 }

@@ -777,7 +777,7 @@ checksum = "00b0228411908ca8685dba7fc2cdd70ec9990a6e753e89b6ac91a84c40fbaf4b"
 [[package]]
 name = "geometry_2d"
 version = "0.0.1"
-source = "git+https://github.com/BlueBukkitDev/geometry_2d?branch=master#3b5601df61284dd3ed82eec5b8b40e71f85bf8a5"
+source = "git+https://github.com/BlueBukkitDev/geometry_2d#a098ead0f3f09ad7704766a1c2f974c404ca4c13"
 dependencies = [
  "rand 0.7.3",
 ]
