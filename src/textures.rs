@@ -1,6 +1,7 @@
 #![allow(unused)]
 
 use ggez::{graphics::Image, Context};
+use image::{ImageBuffer, buffer::PixelsMut, GenericImageView};
 
 pub struct TerrainTex {
     terrain_grass:Image,

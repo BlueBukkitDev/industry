@@ -2,6 +2,7 @@
 
 use geometry_2d::geometry::Position_i32;
 use ggez::{graphics::{Canvas, DrawParam, Image}, Context};
+use image::{ImageBuffer, GenericImageView};
 
 use crate::{textures::{TerrainTex, ImprovementTex, StructureTex}, client::Viewport};
 
@@ -31,13 +32,28 @@ impl World {
     fn populate(&mut self) {
         let max = self.size as usize;
         println!("World width: {} (fn populate)", max);
+        let mut map = image::open("res/map.png").unwrap();
         for y in 0..max {
             self.tiles.push(Vec::new());
         }
         for y in 0..max {
             for x in 0..max {
-                self.tiles[y].push(Tile::new(TerrainType::Grass, ImprovementType::None, StructureType::None, Position_i32::new(x as i32, y as i32)));
+                let pixel = map.get_pixel(x as u32, y as u32);
+                let t:Tile = Tile::new(self.get_terrain_by_color(pixel[0], pixel[1], pixel[2]), ImprovementType::None, StructureType::None, Position_i32::new(x as i32, y as i32));
+                self.tiles[y].push(t);
             }
+        }
+    }
+
+    pub fn get_terrain_by_color(&self, r:u8, g:u8, b:u8) -> TerrainType {
+        if(r == 128 && g == 128 && b == 128) {
+            TerrainType::Rock
+        }else if(r == 255 && g == 255 && b == 0) {
+            TerrainType::Sand
+        }else if(r == 0 && g == 0 && b == 255) {
+            TerrainType::Water
+        }else {
+            TerrainType::Grass
         }
     }
 
@@ -121,7 +137,7 @@ impl Tile {
 pub enum TerrainType {
     Grass,
     Sand,
-    Dirt,
+    Rock,
     Water
 }
 

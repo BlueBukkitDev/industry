@@ -16,7 +16,7 @@ pub struct MainState {
 impl MainState {
     pub fn new(ctx: &mut Context) -> GameResult<MainState> {
         Ok(MainState{
-            world: World::new(2, ctx, 100)
+            world: World::new(2, ctx, 40)
         })
     }
 
