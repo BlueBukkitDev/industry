@@ -33,7 +33,9 @@ impl Viewport {
     }
 
     pub fn transform(&mut self, pos:Position_i32) {
-        self.pos = pos;
+        if pos.x >= 0 && pos.y >= 0 {
+            self.pos = pos;
+        }
     }
 
     pub fn populate(&mut self) {
@@ -51,8 +53,8 @@ impl Viewport {
      Takes in the entire world's tiles to determine which should be rendered based on current position. 
      */
     pub fn update(&mut self, world_tiles:&Vec<Vec<Tile>>) {
-        let xmin = self.pos.x as usize;
-        let ymin = self.pos.y as usize;
+        let xmin = (self.pos.x/100) as usize;
+        let ymin = (self.pos.y/100) as usize;
         let mut x = 0;
         let mut y = 0;
         for y in 0..self.ymax {
@@ -76,6 +78,21 @@ impl Viewport {
             TerrainType::Rock => self.ter_tex.terrain_rock(),
             TerrainType::Sand => self.ter_tex.terrain_sand(),
             TerrainType::Water => self.ter_tex.terrain_water()
+        }
+    }
+
+    /**
+     * Takes in 0-3, where 0 is left, 1 is up, 2 is right, and 3 is down. For safety, anything else will be treated as 3. 
+     */
+    pub fn pan(&mut self, dir:u8) {
+        if dir == 0 {
+            self.transform(Position_i32::new(self.pos.x - 100, self.pos.y));
+        }else if dir == 1 {
+            self.transform(Position_i32::new(self.pos.x, self.pos.y - 100));
+        }else if dir == 2 {
+            self.transform(Position_i32::new(self.pos.x + 100, self.pos.y));
+        }else {
+            self.transform(Position_i32::new(self.pos.x, self.pos.y + 100));
         }
     }
 }

@@ -38,7 +38,7 @@ impl World {
         }
         for y in 0..max {
             for x in 0..max {
-                let pixel = map.get_pixel(x as u32, y as u32);
+                let pixel = map.get_pixel(y as u32, x as u32);
                 let t:Tile = Tile::new(self.get_terrain_by_color(pixel[0], pixel[1], pixel[2]), ImprovementType::None, StructureType::None, Position_i32::new(x as i32, y as i32));
                 self.tiles[y].push(t);
             }
@@ -61,6 +61,10 @@ impl World {
         self.view.render(canvas);
     }
 
+    pub fn update(&mut self) {
+        self.view.update(&self.tiles);
+    }
+
     pub fn get_tiles(&self) -> &Vec<Vec<Tile>> {
         &self.tiles
     }
@@ -79,6 +83,10 @@ impl World {
 
     pub fn get_tile(&self, pos:Position_i32) -> Tile {
         self.tiles[pos.x as usize][pos.y as usize]
+    }
+
+    pub fn get_view(&mut self) -> &mut Viewport {
+        &mut self.view
     }
 }
 

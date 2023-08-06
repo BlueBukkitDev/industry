@@ -27,6 +27,7 @@ impl MainState {
 
 impl event::EventHandler for MainState {
     fn update(&mut self, _ctx: &mut Context) -> GameResult {
+        self.world.update();
         Ok(())
     }
 
@@ -49,6 +50,14 @@ impl event::EventHandler for MainState {
     fn key_down_event(&mut self, _ctx: &mut Context, input: KeyInput, _repeat: bool) -> GameResult {
         if input.keycode == Some(keyboard::KeyCode::Escape) {
             _ctx.request_quit();
+        }else if input.keycode == Some(keyboard::KeyCode::A) {
+            self.world.get_view().pan(0);
+        }else if input.keycode == Some(keyboard::KeyCode::W) {
+            self.world.get_view().pan(1);
+        }else if input.keycode == Some(keyboard::KeyCode::D) {
+            self.world.get_view().pan(2);
+        }else if input.keycode == Some(keyboard::KeyCode::S) {
+            self.world.get_view().pan(3);
         }
         Ok(())
     }
