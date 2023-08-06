@@ -2,6 +2,7 @@
 
 use geometry_2d::geometry::Position_i32;
 use ggez::{graphics::{Canvas, DrawParam, Image}, Context};
+use glam::Vec2;
 use crate::{world::{Tile, World, TerrainType, ImprovementType, StructureType}, textures::{TerrainTex, ImprovementTex, StructureTex}};
 
 pub struct Viewport {
@@ -23,7 +24,7 @@ impl Viewport {
             pos:pos,
             tiles:tiles,
             xmax:22,
-            ymax:11
+            ymax:12
         };
         view
     }
@@ -65,9 +66,11 @@ impl Viewport {
     }
 
     pub fn render(&self, canvas:&mut Canvas) {
+        let x_offset = (self.pos.x%100) as f32;
+        let y_offset = (self.pos.y%100) as f32;
         for y in 0..self.ymax {
             for x in 0..self.xmax {
-                canvas.draw(self.get_terrain_tex(self.tiles[y][x]), DrawParam::new().dest([x as f32 * 100.0, y as f32 * 100.0]));
+                canvas.draw(self.get_terrain_tex(self.tiles[y][x]), DrawParam::new().dest([x as f32 * 100.0-x_offset, y as f32 * 100.0-y_offset]));
             }
         }
     }
@@ -86,13 +89,13 @@ impl Viewport {
      */
     pub fn pan(&mut self, dir:u8) {
         if dir == 0 {
-            self.transform(Position_i32::new(self.pos.x - 100, self.pos.y));
+            self.transform(Position_i32::new(self.pos.x - 10, self.pos.y));
         }else if dir == 1 {
-            self.transform(Position_i32::new(self.pos.x, self.pos.y - 100));
+            self.transform(Position_i32::new(self.pos.x, self.pos.y - 10));
         }else if dir == 2 {
-            self.transform(Position_i32::new(self.pos.x + 100, self.pos.y));
+            self.transform(Position_i32::new(self.pos.x + 10, self.pos.y));
         }else {
-            self.transform(Position_i32::new(self.pos.x, self.pos.y + 100));
+            self.transform(Position_i32::new(self.pos.x, self.pos.y + 10));
         }
     }
 }
