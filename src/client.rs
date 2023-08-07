@@ -34,7 +34,7 @@ impl Viewport {
     }
 
     pub fn transform(&mut self, pos:Position_i32) {
-        if pos.x >= 0 && pos.y >= 0 {
+        if pos.x >= 0 && pos.y >= 0 /*&& pos.x <= SIZE_OF_WORLD-VIEW_SIZE && sAmEfOrThE_yVaR */{
             self.pos = pos;
         }
     }
@@ -85,17 +85,18 @@ impl Viewport {
     }
 
     /**
-     * Takes in 0-3, where 0 is left, 1 is up, 2 is right, and 3 is down. For safety, anything else will be treated as 3. 
+     * Takes in `dir` 0-3, where 0 is left, 1 is up, 2 is right, and 3 is down. For safety, anything else will be treated as 3. 
+     * Field `amt` is a distance to transform the position.
      */
-    pub fn pan(&mut self, dir:u8) {
+    pub fn pan(&mut self, dir:u8, amt:i32) {
         if dir == 0 {
-            self.transform(Position_i32::new(self.pos.x - 10, self.pos.y));
+            self.transform(Position_i32::new(self.pos.x - amt, self.pos.y));
         }else if dir == 1 {
-            self.transform(Position_i32::new(self.pos.x, self.pos.y - 10));
+            self.transform(Position_i32::new(self.pos.x, self.pos.y - amt));
         }else if dir == 2 {
-            self.transform(Position_i32::new(self.pos.x + 10, self.pos.y));
+            self.transform(Position_i32::new(self.pos.x + amt, self.pos.y));
         }else {
-            self.transform(Position_i32::new(self.pos.x, self.pos.y + 10));
+            self.transform(Position_i32::new(self.pos.x, self.pos.y + amt));
         }
     }
 }
