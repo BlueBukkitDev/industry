@@ -32,14 +32,20 @@ impl World {
     fn populate(&mut self) {
         let max = self.size as usize;
         println!("World width: {} (fn populate)", max);
-        let mut map = image::open("res/map.png").unwrap();
+        let mut terrain_map = image::open("res/terrain.png").unwrap();
+        let mut improvement_map = image::open("res/improvements.png").unwrap();
+        let mut structure_map = image::open("res/structures.png").unwrap();
         for y in 0..max {
             self.tiles.push(Vec::new());
         }
         for y in 0..max {
             for x in 0..max {
-                let pixel = map.get_pixel(y as u32, x as u32);
-                let t:Tile = Tile::new(self.get_terrain_by_color(pixel[0], pixel[1], pixel[2]), ImprovementType::None, StructureType::None, Position_i32::new(x as i32, y as i32));
+                let pixel = terrain_map.get_pixel(y as u32, x as u32);
+                let t:Tile = Tile::new(
+                    self.get_terrain_by_color(pixel[0], pixel[1], pixel[2]), 
+                    self.get_improvements_by_color(pixel[0], pixel[1], pixel[2]), 
+                    self.get_structures_by_color(pixel[0], pixel[1], pixel[2]), 
+                    Position_i32::new(x as i32, y as i32));
                 self.tiles[y].push(t);
             }
         }
@@ -54,6 +60,34 @@ impl World {
             TerrainType::Water
         }else {
             TerrainType::Grass
+        }
+    }
+
+    pub fn get_improvements_by_color(&self, r:u8, g:u8, b:u8) -> ImprovementType {
+        if(r == 100 && g == 100 && b == 100) {
+            ImprovementType::Boulders
+        }else if(r == 0 && g == 125 && b == 170) {
+            ImprovementType::Fish
+        }else if(r == 0 && g == 255 && b == 0) {
+            ImprovementType::Forest
+        }else if(r == 220 && g == 220 && b == 90) {
+            ImprovementType::Ore
+        }else if(r == 170 && g == 120 && b == 0) {
+            ImprovementType::Herd
+        }else {
+            ImprovementType::None
+        }
+    }
+
+    pub fn get_structures_by_color(&self, r:u8, g:u8, b:u8) -> StructureType {
+        if(r == 255 && g == 255 && b == 0) {
+            StructureType::CityHall
+        }else if(r == 0 && g == 0 && b == 255) {
+            StructureType::University
+        }else if(r == 0 && g == 255 && b == 0) {
+            StructureType::CustomsOffice
+        }else {
+            StructureType::None
         }
     }
 
@@ -162,7 +196,8 @@ pub enum ImprovementType {
     Herd, 
     Orchard,
     Crop,
-    OilSlick
+    OilSlick,
+    Fish
 }
 
 #[derive(Copy, Clone)]
